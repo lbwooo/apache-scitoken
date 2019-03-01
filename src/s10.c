@@ -6,8 +6,8 @@
 #include "apr_strings.h"
 #include "http_log.h"
 #include "http_request.h"
-#include "scitokens-cpp/src/scitokens.h"
-//#include <scitokens/scitokens.h>
+//#include "scitokens-cpp/src/scitokens.h"
+#include <scitokens/scitokens.h>
 
 //#include <sys/types.h>
 //#include <cassert>
