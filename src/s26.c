@@ -12,7 +12,6 @@
 
 //using namespace std;  // NOLINT
 
-//todo parse request, apr_table_get
 module AP_MODULE_DECLARE_DATA auth_scitoken26_module;
 
 int numberofissuer = 1;
@@ -22,7 +21,7 @@ int Scitoken26Verify(request_rec *r, const char *require_line, const void *parse
   char *null_ended_list[numberofissuer+1];
   const char *auth_line, *auth_scheme;
   auth_line = apr_table_get(r->headers_in,"Authorization");//TODO, proxy?
-  auth_scheme = ap_getword(r->pool, &auth_line, ' ');// parsing/ pool~
+  auth_scheme = ap_getword(r->pool, &auth_line, ' ');
   if (strcasecmp(auth_scheme, "Bearer")){
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "wrong scheme", r->uri);
     return AUTHZ_DENIED;
@@ -106,13 +105,13 @@ static void register_hooks(apr_pool_t *p)
 			    &Scitoken26_Provider,
 			    AP_AUTH_INTERNAL_PER_CONF);
 }
-AP_DECLARE_MODULE(auth_scitoken26) =// .load filename? module name
+AP_DECLARE_MODULE(auth_scitoken26) =//
 {
   STANDARD20_MODULE_STUFF,
   NULL, /* dir config creater TODO*/
-  NULL,   /* dir merger -- default is to override TODO*/
-  NULL,                        /* server config */
-  NULL,                        /* merge server config */
-  NULL,              /* command apr_table_t TODO*/
-  register_hooks               /* register hooks */
+  NULL, /* dir merger -- default is to override TODO*/
+  NULL, /* server config */
+  NULL, /* merge server config */
+  NULL, /* command apr_table_t TODO*/
+  register_hooks   /* register hooks */
 };
