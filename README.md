@@ -12,7 +12,7 @@ There are built-in checks for issuers, expiration data, and algorithm but by def
 ### Build requirement
 [scitoken-cpp](https://github.com/scitokens/scitokens-cpp)
 
-###Installation
+### Installation
 
 Install [scitoken-cpp](https://github.com/scitokens/scitokens-cpp)
 
