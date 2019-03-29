@@ -1,8 +1,6 @@
 # apache-scitoken
 
-Authentication module for Apache httpd with Scitoken.
-
-scitoken.org
+Authentication module for Apache httpd with [Scitoken].(scitoken.org)
 
 The authentication process is carried out by an authentication provider and specified by /src/scitoken.c.
 
