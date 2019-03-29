@@ -73,25 +73,25 @@ static const char *set_scitoken_param_iss(cmd_parms *cmd, void *config, const ch
  * , parses the directive and sets the (module) configuration accordingly
  * NOT implemented
  */
-static const char *set_scitoken_param_exp(cmd_parms *cmd, void *config, const char *issuersstr)
-{
-    return NULL;
-}
+// static const char *set_scitoken_param_exp(cmd_parms *cmd, void *config, const char *issuersstr)
+// {
+//     return NULL;
+// }
 /**
  * This function takes the argument "alg" from the Apache configuration file
  * , parses the directive and sets the (module) configuration accordingly
  * NOT implemented
  */
-static const char *set_scitoken_param_alg(cmd_parms *cmd, void *config, const char *issuersstr)
-{
-    return NULL;
-}
+// static const char *set_scitoken_param_alg(cmd_parms *cmd, void *config, const char *issuersstr)
+// {
+//     return NULL;
+// }
 
 static const command_rec authz_scitoken_cmds[] =
 {
 AP_INIT_TAKE1("issuers", set_scitoken_param_iss, NULL, OR_AUTHCFG, "list of issuers"),
-AP_INIT_TAKE1("exp", set_scitoken_param_exp, NULL, OR_AUTHCFG, "Enable exp time validation"),
-AP_INIT_TAKE1("alg", set_scitoken_param_alg, NULL, OR_AUTHCFG, "Enable algorithm validation"),
+//AP_INIT_TAKE1("exp", set_scitoken_param_exp, NULL, OR_AUTHCFG, "Enable exp time validation"),
+//AP_INIT_TAKE1("alg", set_scitoken_param_alg, NULL, OR_AUTHCFG, "Enable algorithm validation"),
         {NULL}
 };
 
