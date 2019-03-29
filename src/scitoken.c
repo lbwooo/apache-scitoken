@@ -73,37 +73,37 @@ static const char *set_scitoken_param_iss(cmd_parms *cmd, void *config, const ch
  * , parses the directive and sets the (module) configuration accordingly
  * NOT implemented
  */
-// static const char *set_scitoken_param_exp(cmd_parms *cmd, void *config, const char *issuersstr)
-// {
-//     return NULL;
-// }
+static const char *set_scitoken_param_exp(cmd_parms *cmd, void *config, const char *issuersstr)
+{
+    return NULL;
+}
 /**
  * This function takes the argument "alg" from the Apache configuration file
  * , parses the directive and sets the (module) configuration accordingly
  * NOT implemented
  */
-// static const char *set_scitoken_param_alg(cmd_parms *cmd, void *config, const char *issuersstr)
-// {
-//     return NULL;
-// }
+static const char *set_scitoken_param_alg(cmd_parms *cmd, void *config, const char *issuersstr)
+{
+    return NULL;
+}
 
 static const command_rec authz_scitoken_cmds[] =
 {
 AP_INIT_TAKE1("issuers", set_scitoken_param_iss, NULL, OR_AUTHCFG, "list of issuers"),
-//AP_INIT_TAKE1("exp", set_scitoken_param_exp, NULL, OR_AUTHCFG, "Enable exp time validation"),
-//AP_INIT_TAKE1("alg", set_scitoken_param_alg, NULL, OR_AUTHCFG, "Enable algorithm validation"),
+AP_INIT_TAKE1("exp", set_scitoken_param_exp, NULL, OR_AUTHCFG, "Enable exp time validation"),
+AP_INIT_TAKE1("alg", set_scitoken_param_alg, NULL, OR_AUTHCFG, "Enable algorithm validation"),
         {NULL}
 };
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~  AUTHZ HANDLERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-module AP_MODULE_DECLARE_DATA auth_scitoken0_module;
+module AP_MODULE_DECLARE_DATA auth_scitoken33_module;
 
 //int numberofissuer = 1;
 /**
  * The main function to verify a Scitoken(It is NOT checking expiration date yet)
  */
-int Scitoken0Verify(request_rec *r, const char *require_line, const void *parsed_require_line) {
+int Scitoken33Verify(request_rec *r, const char *require_line, const void *parsed_require_line) {
   SciToken scitoken;
   char *err_msg;
   const char *auth_line, *auth_scheme;
@@ -114,7 +114,7 @@ int Scitoken0Verify(request_rec *r, const char *require_line, const void *parsed
   
   // Read in configeration
   authz_scitoken_config_rec *conf = ap_get_module_config(r->per_dir_config,
-                                                      &auth_scitoken0_module);
+                                                      &auth_scitoken33_module);
   int numberofissuer = conf->numberofissuer;
   char *null_ended_list[numberofissuer+1];
   
@@ -173,9 +173,9 @@ int Scitoken0Verify(request_rec *r, const char *require_line, const void *parsed
   acl.authz = "read";
   //acl.resource = issuers[issuer].c_str();
   
-  if (enforcer_test(enf, scitoken, &acl, &err_msg)) {
+  if (!(enforcer_test(enf, scitoken, &acl, &err_msg))) {
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "Failed enforcer test");
-    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, err_msg, r->uri);
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s", err_msg);
     return AUTHZ_DENIED;
   }
   
@@ -193,23 +193,23 @@ int Scitoken0Verify(request_rec *r, const char *require_line, const void *parsed
 /* ~~~~~~~~~~~~~~~~~~~~~~~~  APACHE HOOKS/HANDLERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 //module handler
-static const authz_provider Scitoken0_Provider =
+static const authz_provider Scitoken33_Provider =
   {
-    &Scitoken0Verify,
+    &Scitoken33Verify,
     NULL,
   };
 
 //hook registration function
 static void register_hooks(apr_pool_t *p)
 {
-  ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "Scitoken0",
-                AUTHZ_PROVIDER_VERSION,
-                &Scitoken0_Provider,
-                AP_AUTH_INTERNAL_PER_CONF);
+  ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "Scitoken33",
+			    AUTHZ_PROVIDER_VERSION,
+			    &Scitoken33_Provider,
+			    AP_AUTH_INTERNAL_PER_CONF);
 }
 
 //module name tags
-AP_DECLARE_MODULE(auth_scitoken0) =
+AP_DECLARE_MODULE(auth_scitoken33) =
 {
   STANDARD20_MODULE_STUFF,
   create_authz_scitoken_dir_config, /* dir config creater */
