@@ -8,6 +8,12 @@ The module will check the request token against a list of issuers provided by th
 
 There are built-in checks for issuers, expiration data, and algorithm but by default, only issuer check is enabled.
 
+
+### Build requirement
+[scitoken-cpp](https://github.com/scitokens/scitokens-cpp)
+
+###Installation
+
 Install [scitoken-cpp](https://github.com/scitokens/scitokens-cpp)
 
 Move scitokens-cpp/src/scitokens.h to your include directory
