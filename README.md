@@ -3,6 +3,7 @@
 This implements a Scitoken authorization module for Apache
 
 Install [scitoken-cpp](https://github.com/scitokens/scitokens-cpp)
+
 Move scitokens-cpp/src/scitokens.h to your include directory
 In /src, compile the module:
 ```
