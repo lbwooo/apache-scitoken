@@ -6,7 +6,7 @@ The authentication process is carried out by an authentication provider and spec
 
 The module will check the request token against a list of issuers provided by the Apache configuration file.
 
-There are built-in checks for issuers, expiration data, and algorithm but by default, only issuer check is enabled.
+There are built-in checks for issuers, expiration date, and algorithm but by default, only issuer check is enabled.
 
 
 ## Build requirement
@@ -24,10 +24,12 @@ $ apxs -i -a -c scitoken.c -lSciTokens
 $ cat /etc/apache2/mods-enabled/auth_scitokenX.load
 LoadModule auth_scitokenX_module /usr/lib/apache2/modules/scitoken.so
 ```
-Modify your Apache configeration file.
+
+## Configuration
+Modify your Apache configuration file.
 
 An example is provided, /config(Ubuntu 16.04.6 LTS)
 
-In the example, the only issuer is "https://demo.scitokens.org"
+In the example, the only issuer is "https://demo.scitokens.org". The protected directory is "/demo"
 
 Restart Apache
