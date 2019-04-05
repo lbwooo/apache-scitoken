@@ -6,7 +6,7 @@ The authentication process is carried out by an authentication provider and spec
 
 The module will check the request token against a list of issuers provided by the Apache configuration file.
 
-There are built-in checks for issuers, expiration date, and algorithm but by default, only issuer check is enabled.
+There are built-in checks for issuers, expiration date, and algorithm(disabled by default)
 
 
 ## Build requirement
