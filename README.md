@@ -45,7 +45,7 @@ To make a 200 request:
 
 2.Change "aud", "scp" accordingly 
 "scp": "read:/demo",
-"aud": "http://Vt20.security.ncsa.illinois.edu",
+"aud": "Vt20",
 
 3.Chance "scp" to "scope"
 
