@@ -18,6 +18,7 @@
 
 typedef struct {
 char** issuers;
+char** resources;
 int numberofissuer;
 } authz_scitoken_config_rec;
 
@@ -28,10 +29,12 @@ static void *create_authz_scitoken_dir_config(apr_pool_t *p, char *d)
     authz_scitoken_config_rec *conf = apr_palloc(p, sizeof(*conf));
     
     char** issuers = calloc(1, sizeof(char*));
+    char**resources = calloc(1, sizeof(char*));
     *(issuers) = "issuer";
+    *(resources) = "resources";
     conf->numberofissuer = 1;
     conf->issuers = issuers;
-    
+    conf->resources = resources;
     return conf;
 }
 
@@ -43,6 +46,7 @@ static void *merge_auth_scitoken_dir_config(apr_pool_t *p, void *basev, void *ne
     authz_scitoken_config_rec *new_conf = new_confv;
     newconf->numberofissuer = new_conf->numberofissuer ? new_conf->numberofissuer : base->numberofissuer;
     newconf->issuers = new_conf->issuers ? new_conf->issuers : base->issuers;
+    newconf->resources = new_conf->resources ? new_conf->resources : base->resources;
 }
 
 /**
@@ -55,17 +59,32 @@ static const char *set_scitoken_param_iss(cmd_parms *cmd, void *config, const ch
 {
     authz_scitoken_config_rec *conf = (authz_scitoken_config_rec *)config;
     char *token = strtok((char *)issuersstr, ",");
+    char *res;
+    char *domain;
     int counter = 0;
     char** issuers = calloc(1, sizeof(char*));
+    char** resources = calloc(1, sizeof(char*));
     while (token != NULL)
     {
         *(issuers+counter) = token;
         token = strtok(NULL, ",");
         counter+=1;
         issuers = realloc(issuers, (counter+1) * sizeof(char*));
+        resources = realloc(resources, (counter+1) * sizeof(char*));
+    }
+    conf->numberofissuer = counter;//+1;
+    counter = counter - 1;
+    while (counter != -1)
+    {
+        domain = strtok(*(issuers+counter), ";");
+        res = strtok(NULL, ";");
+        *(issuers+counter) = domain;
+        *(resources+counter) = res;
+        counter -= 1;
     }
     conf->issuers = issuers;
-    conf->numberofissuer = counter+1;
+    conf->resources = resources;
+    //ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s",*resources);
     return NULL;
 }
 /**
@@ -73,37 +92,37 @@ static const char *set_scitoken_param_iss(cmd_parms *cmd, void *config, const ch
  * , parses the directive and sets the (module) configuration accordingly
  * NOT implemented
  */
-//static const char *set_scitoken_param_exp(cmd_parms *cmd, void *config, const char *issuersstr)
-//{
-//    return NULL;
-//}
+static const char *set_scitoken_param_exp(cmd_parms *cmd, void *config, const char *issuersstr)
+{
+    return NULL;
+}
 /**
  * This function takes the argument "alg" from the Apache configuration file
  * , parses the directive and sets the (module) configuration accordingly
  * NOT implemented
  */
-//static const char *set_scitoken_param_alg(cmd_parms *cmd, void *config, const char *issuersstr)
-//{
-//    return NULL;
-//}
+static const char *set_scitoken_param_alg(cmd_parms *cmd, void *config, const char *issuersstr)
+{
+    return NULL;
+}
 
 static const command_rec authz_scitoken_cmds[] =
 {
 AP_INIT_TAKE1("issuers", set_scitoken_param_iss, NULL, OR_AUTHCFG, "list of issuers"),
-//AP_INIT_TAKE1("exp", set_scitoken_param_exp, NULL, OR_AUTHCFG, "Enable exp time validation"),
-//AP_INIT_TAKE1("alg", set_scitoken_param_alg, NULL, OR_AUTHCFG, "Enable algorithm validation"),
+AP_INIT_TAKE1("exp", set_scitoken_param_exp, NULL, OR_AUTHCFG, "Enable exp time validation"),
+AP_INIT_TAKE1("alg", set_scitoken_param_alg, NULL, OR_AUTHCFG, "Enable algorithm validation"),
         {NULL}
 };
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~  AUTHZ HANDLERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-module AP_MODULE_DECLARE_DATA auth_scitoken1_module;
+module AP_MODULE_DECLARE_DATA auth_scitoken48_module;
 
 //int numberofissuer = 1;
 /**
  * The main function to verify a Scitoken(It is NOT checking expiration date yet)
  */
-int Scitoken1Verify(request_rec *r, const char *require_line, const void *parsed_require_line) {
+int Scitoken48Verify(request_rec *r, const char *require_line, const void *parsed_require_line) {
   SciToken scitoken;
   char *err_msg;
   const char *auth_line, *auth_scheme;
@@ -114,7 +133,7 @@ int Scitoken1Verify(request_rec *r, const char *require_line, const void *parsed
   
   // Read in configeration
   authz_scitoken_config_rec *conf = ap_get_module_config(r->per_dir_config,
-                                                      &auth_scitoken1_module);
+                                                      &auth_scitoken48_module);
   int numberofissuer = conf->numberofissuer;
   char *null_ended_list[numberofissuer+1];
   
@@ -151,7 +170,11 @@ int Scitoken1Verify(request_rec *r, const char *require_line, const void *parsed
     return AUTHZ_DENIED;
   }
   
+  //string issuer(issuer_ptr);
+  //delete issuer_ptr;
+  
   Enforcer enf;
+  
   char hostname[1024];
   const char* aud_list[2];
   
@@ -165,17 +188,37 @@ int Scitoken1Verify(request_rec *r, const char *require_line, const void *parsed
 
   if (!(enf = enforcer_create(issuer_ptr, aud_list, &err_msg))) {
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "Failed to create enforcer");
-    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, err_msg, r->uri);
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s", err_msg);
     return AUTHZ_DENIED;
   }
   
   Acl acl;
   acl.authz = "read";
-  //acl.resource = issuers[issuer].c_str();
+  acl.resource = "";
+  int found = 0;
+  //ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s",*conf->resources);
+  for(int i=0; i<conf->numberofissuer; i++){
+  ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s",issuer_ptr);
+  ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s",*(conf->issuers + i));
+  if(*(issuer_ptr) == **(conf->issuers + i))
+    {
+    acl.resource = *(conf->resources + i);
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s",*(conf->resources + i));
+    found = 1;
+    break;
+    }
+  }
+  if(!found){
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "Resource not found");
+    return AUTHZ_DENIED;
+  }
+  //acl.resource = "/demo";
   
-  if (!(enforcer_test(enf, scitoken, &acl, &err_msg))) {
+  if (enforcer_test(enf, scitoken, &acl, &err_msg)) {
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "Failed enforcer test");
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s", err_msg);
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s", hostname);
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s", null_ended_list[0]);
     return AUTHZ_DENIED;
   }
   
@@ -193,25 +236,23 @@ int Scitoken1Verify(request_rec *r, const char *require_line, const void *parsed
 /* ~~~~~~~~~~~~~~~~~~~~~~~~  APACHE HOOKS/HANDLERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 //module handler
-
-
-static const authz_provider Scitoken1_Provider =
+static const authz_provider Scitoken48_Provider =
   {
-    &Scitoken1Verify,
+    &Scitoken48Verify,
     NULL,
   };
 
 //hook registration function
 static void register_hooks(apr_pool_t *p)
 {
-  ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "Scitoken1",
-			    AUTHZ_PROVIDER_VERSION,
-			    &Scitoken1_Provider,
-			    AP_AUTH_INTERNAL_PER_CONF);
+  ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "Scitoken48",
+                AUTHZ_PROVIDER_VERSION,
+                &Scitoken48_Provider,
+                AP_AUTH_INTERNAL_PER_CONF);
 }
 
 //module name tags
-AP_DECLARE_MODULE(auth_scitoken1) =
+AP_DECLARE_MODULE(auth_scitoken48) =
 {
   STANDARD20_MODULE_STUFF,
   create_authz_scitoken_dir_config, /* dir config creater */
