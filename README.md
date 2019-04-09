@@ -54,8 +54,6 @@ To make a 200 request:
 
 1.https://demo.scitokens.org Set payload to protected area
 
-2.
-"scp": "read:/demo",
-"aud": "Vt20",
+2."scp": "read:/demo", "aud": "Vt20",
 
 3.Chance "scp" to "scope"
