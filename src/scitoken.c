@@ -52,8 +52,8 @@ static void *merge_auth_scitoken_dir_config(apr_pool_t *p, void *basev, void *ne
 /**
  * This function takes the argument "issuers" from the Apache configuration file
  * , parses the directive and sets the (module) configuration accordingly
- * Input: a string of issuers seperated by ","
- *        "issuer1,issuer2...."
+ * Input: a string of issuers;resource seperated by ","
+ *        "issuer1;resource1,issuer2;resource2...."
  */
 static const char *set_scitoken_param_iss(cmd_parms *cmd, void *config, const char *issuersstr)
 {
@@ -118,9 +118,9 @@ AP_INIT_TAKE1("alg", set_scitoken_param_alg, NULL, OR_AUTHCFG, "Enable algorithm
 
 module AP_MODULE_DECLARE_DATA auth_scitoken48_module;
 
-//int numberofissuer = 1;
+
 /**
- * The main function to verify a Scitoken(It is NOT checking expiration date yet)
+ * The main function to verify a Scitoken
  */
 int Scitoken48Verify(request_rec *r, const char *require_line, const void *parsed_require_line) {
   SciToken scitoken;
@@ -137,7 +137,7 @@ int Scitoken48Verify(request_rec *r, const char *require_line, const void *parse
   int numberofissuer = conf->numberofissuer;
   char *null_ended_list[numberofissuer+1];
   
-  //get the list of issuers from configeration and create a null ended list of strings
+  //Get the list of issuers from configuration and create a null ended list of strings
   for(int i = 0; i<numberofissuer; i++){
     null_ended_list[i] = *(conf->issuers+i);
   }
@@ -170,15 +170,14 @@ int Scitoken48Verify(request_rec *r, const char *require_line, const void *parse
     return AUTHZ_DENIED;
   }
   
-  //string issuer(issuer_ptr);
-  //delete issuer_ptr;
   
+  //Preparing for enforcer test
   Enforcer enf;
   
   char hostname[1024];
   const char* aud_list[2];
   
-  // Get the hostname for the audience
+  // Get the hostname for the audience. It is using hostname but NOT domain name. Set your payload accordingly
   if (gethostname(hostname, 1024) != 0) {
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "Failed to get hostname");
     return AUTHZ_DENIED;
@@ -195,6 +194,7 @@ int Scitoken48Verify(request_rec *r, const char *require_line, const void *parse
   Acl acl;
   acl.authz = "read";
   acl.resource = "";
+  //If a resource is found for the audience
   int found = 0;
   //ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "%s",*conf->resources);
   for(int i=0; i<conf->numberofissuer; i++){
@@ -212,7 +212,7 @@ int Scitoken48Verify(request_rec *r, const char *require_line, const void *parse
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "Resource not found");
     return AUTHZ_DENIED;
   }
-  //acl.resource = "/demo";
+
   
   if (enforcer_test(enf, scitoken, &acl, &err_msg)) {
     ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "Failed enforcer test");
