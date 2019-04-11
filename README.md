@@ -57,3 +57,5 @@ To make a 200 request:
 2."scp": "read:/demo", "aud": "Vt20",
 
 3.Change "scp" to "scope"
+
+4. curl -H "Authorization: Bearer YOURTOKEN" http://Vt20.security.ncsa.illinois.edu/demo/index2.html
