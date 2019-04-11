@@ -58,4 +58,4 @@ To make a 200 request:
 
 3.Change "scp" to "scope"
 
-4. curl -H "Authorization: Bearer YOURTOKEN" http://Vt20.security.ncsa.illinois.edu/demo/index2.html
+4.curl -H "Authorization: Bearer YOURTOKEN" http://Vt20.security.ncsa.illinois.edu/demo/index2.html
