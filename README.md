@@ -38,8 +38,17 @@ A minimal configuration might be:
           AuthName "private area"
           Require Scitoken
           issuers "https://issuer1;/resource1"
+          #Dav on
 </Location>
 ```
+
+To Enable WebDav, 
+```
+sudo a2enmod dav
+sudo a2enmod dav_fs
+```
+
+This allows creating, moving, copying, and deleting resources and collections on a remote web server and provide access to resources located in the server's file system.
 
 See /config for an example(Ubuntu 16.04.6 LTS)
 
