@@ -8,6 +8,8 @@ The module will check the request token against a list of issuers provided by th
 
 There are built-in checks for issuers, expiration date, and algorithm(disabled by default)
 
+This repo also includes the necessary configuration for an Apache webserver to provide WebDav access using SciTokens for authorization. With this configuration, you may provide authenticated access to write (PUT) or read (GET) on the webserver.
+
 
 ## Build requirement
 [scitoken-cpp](https://github.com/scitokens/scitokens-cpp)
